@@ -39,19 +39,55 @@
                                     <Label Grid.Row="0" Grid.Column="3" Text="40'" FontAttributes="Bold" FontSize="12"/>
                                     <Label Grid.Row="0" Grid.Column="4" Text="20'" FontAttributes="Bold" FontSize="12"/>
                                 </Grid>
-                                <CollectionView ItemsSource="{Binding Bays}">
-                                    <CollectionView.ItemTemplate>
+
+                                <VerticalStackLayout BindableLayout.ItemsSource="{Binding Bays}">
+                                    <BindableLayout.ItemTemplate>
                                         <DataTemplate>
-                                            <Grid ColumnDefinitions="40,*,*,*,*" Padding="0,2">
-                                                <Label Grid.Column="0" Text="{Binding BayCode}" FontSize="13"/>
-                                                <Label Grid.Column="1" Text="{Binding Examine}" FontSize="13"/>
-                                                <Label Grid.Column="2" Text="{Binding NotExamine}" FontSize="13"/>
-                                                <Label Grid.Column="3" Text="{Binding Space40}" FontSize="13"/>
-                                                <Label Grid.Column="4" Text="{Binding Space20}" FontSize="13"/>
+                                            <Grid ColumnDefinitions="40,*,*,*,*" Padding="4,2">
+                                                <Grid.Triggers>
+                                                    <DataTrigger TargetType="Grid" Binding="{Binding BayCode}" Value="D">
+                                                        <Setter Property="BackgroundColor" Value="#FFE9A8"/>
+                                                    </DataTrigger>
+                                                </Grid.Triggers>
+                                                <Label Grid.Column="0" Text="{Binding BayCode}" FontSize="13">
+                                                    <Label.Triggers>
+                                                        <DataTrigger TargetType="Label" Binding="{Binding BayCode}" Value="D">
+                                                            <Setter Property="FontAttributes" Value="Bold"/>
+                                                        </DataTrigger>
+                                                    </Label.Triggers>
+                                                </Label>
+                                                <Label Grid.Column="1" Text="{Binding Examine}" FontSize="13">
+                                                    <Label.Triggers>
+                                                        <DataTrigger TargetType="Label" Binding="{Binding BayCode}" Value="D">
+                                                            <Setter Property="FontAttributes" Value="Bold"/>
+                                                        </DataTrigger>
+                                                    </Label.Triggers>
+                                                </Label>
+                                                <Label Grid.Column="2" Text="{Binding NotExamine}" FontSize="13">
+                                                    <Label.Triggers>
+                                                        <DataTrigger TargetType="Label" Binding="{Binding BayCode}" Value="D">
+                                                            <Setter Property="FontAttributes" Value="Bold"/>
+                                                        </DataTrigger>
+                                                    </Label.Triggers>
+                                                </Label>
+                                                <Label Grid.Column="3" Text="{Binding Space40}" FontSize="13">
+                                                    <Label.Triggers>
+                                                        <DataTrigger TargetType="Label" Binding="{Binding BayCode}" Value="D">
+                                                            <Setter Property="FontAttributes" Value="Bold"/>
+                                                        </DataTrigger>
+                                                    </Label.Triggers>
+                                                </Label>
+                                                <Label Grid.Column="4" Text="{Binding Space20}" FontSize="13">
+                                                    <Label.Triggers>
+                                                        <DataTrigger TargetType="Label" Binding="{Binding BayCode}" Value="D">
+                                                            <Setter Property="FontAttributes" Value="Bold"/>
+                                                        </DataTrigger>
+                                                    </Label.Triggers>
+                                                </Label>
                                             </Grid>
                                         </DataTemplate>
-                                    </CollectionView.ItemTemplate>
-                                </CollectionView>
+                                    </BindableLayout.ItemTemplate>
+                                </VerticalStackLayout>
                             </VerticalStackLayout>
                         </Frame>
                     </DataTemplate>

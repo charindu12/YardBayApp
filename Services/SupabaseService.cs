@@ -21,7 +21,7 @@ namespace YardBayApp.Services
 
             var options = new SupabaseOptions
             {
-                AutoConnectRealtime = true
+                AutoConnectRealtime = false
             };
 
             _client = new Supabase.Client(SupabaseUrl, SupabaseAnonKey, options);

@@ -31,7 +31,7 @@ namespace YardBayApp.Views
         {
             InitializeComponent();
             ToDatePicker.Date = DateTime.Today;
-            FromDatePicker.Date = DateTime.Today.AddDays(-7); // last week by default
+            FromDatePicker.Date = DateTime.Today; // today only by default
         }
 
         protected override async void OnAppearing()
