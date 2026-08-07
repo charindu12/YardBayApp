@@ -16,7 +16,7 @@ jobs:
       - name: Setup .NET
         uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: '8.0.x'
+          dotnet-version: '9.0.x'
 
       - name: Install MAUI Android workload
         run: dotnet workload install maui-android
@@ -25,7 +25,7 @@ jobs:
         run: dotnet restore YardBayApp.csproj
 
       - name: Build APK (Release)
-        run: dotnet publish YardBayApp.csproj -f net8.0-android -c Release -o out
+        run: dotnet publish YardBayApp.csproj -f net9.0-android -c Release -o out
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
