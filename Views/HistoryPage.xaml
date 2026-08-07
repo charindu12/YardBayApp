@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="YardBayApp.Views.HistoryPage"
+             Title="History">
+
+    <Grid RowDefinitions="Auto,Auto,*" Padding="14">
+
+        <HorizontalStackLayout Grid.Row="0" Spacing="10" Margin="0,4,0,8">
+            <Label Text="From" VerticalOptions="Center" FontAttributes="Bold"/>
+            <DatePicker x:Name="FromDatePicker" Format="dd MMM yyyy"/>
+            <Label Text="To" VerticalOptions="Center" FontAttributes="Bold"/>
+            <DatePicker x:Name="ToDatePicker" Format="dd MMM yyyy"/>
+        </HorizontalStackLayout>
+
+        <HorizontalStackLayout Grid.Row="1" Spacing="10" Margin="0,0,0,10">
+            <Button x:Name="FilterButton" Text="Filter" Clicked="OnFilterClicked" BackgroundColor="#1F3A5F" TextColor="White"/>
+            <Button x:Name="RefreshButton" Text="Refresh" Clicked="OnFilterClicked" BackgroundColor="#616161" TextColor="White"/>
+            <Label x:Name="StatusLabel" TextColor="Red" VerticalOptions="Center"/>
+        </HorizontalStackLayout>
+
+        <RefreshView Grid.Row="2" IsRefreshing="{Binding IsBusy}">
+            <CollectionView x:Name="BatchList">
+                <CollectionView.EmptyView>
+                    <Label Text="No entries found for this date range." HorizontalOptions="Center" Margin="0,40,0,0" TextColor="Gray"/>
+                </CollectionView.EmptyView>
+                <CollectionView.ItemTemplate>
+                    <DataTemplate>
+                        <Frame Margin="0,0,0,10" Padding="12" BorderColor="#DDDDDD" CornerRadius="8">
+                            <VerticalStackLayout Spacing="6">
+                                <HorizontalStackLayout Spacing="14">
+                                    <Label Text="{Binding RecordedAtLabel}" FontAttributes="Bold" FontSize="15"/>
+                                    <Label Text="{Binding BayOutLabel}" TextColor="#1F3A5F" FontAttributes="Bold" FontSize="15"/>
+                                </HorizontalStackLayout>
+                                <Grid ColumnDefinitions="40,*,*,*,*" RowSpacing="2">
+                                    <Label Grid.Row="0" Grid.Column="0" Text="Bay" FontAttributes="Bold" FontSize="12"/>
+                                    <Label Grid.Row="0" Grid.Column="1" Text="Exam." FontAttributes="Bold" FontSize="12"/>
+                                    <Label Grid.Row="0" Grid.Column="2" Text="Not Exam." FontAttributes="Bold" FontSize="12"/>
+                                    <Label Grid.Row="0" Grid.Column="3" Text="40'" FontAttributes="Bold" FontSize="12"/>
+                                    <Label Grid.Row="0" Grid.Column="4" Text="20'" FontAttributes="Bold" FontSize="12"/>
+                                </Grid>
+                                <CollectionView ItemsSource="{Binding Bays}">
+                                    <CollectionView.ItemTemplate>
+                                        <DataTemplate>
+                                            <Grid ColumnDefinitions="40,*,*,*,*" Padding="0,2">
+                                                <Label Grid.Column="0" Text="{Binding BayCode}" FontSize="13"/>
+                                                <Label Grid.Column="1" Text="{Binding Examine}" FontSize="13"/>
+                                                <Label Grid.Column="2" Text="{Binding NotExamine}" FontSize="13"/>
+                                                <Label Grid.Column="3" Text="{Binding Space40}" FontSize="13"/>
+                                                <Label Grid.Column="4" Text="{Binding Space20}" FontSize="13"/>
+                                            </Grid>
+                                        </DataTemplate>
+                                    </CollectionView.ItemTemplate>
+                                </CollectionView>
+                            </VerticalStackLayout>
+                        </Frame>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+            </CollectionView>
+        </RefreshView>
+
+    </Grid>
+
+</ContentPage>

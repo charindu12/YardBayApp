@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <!-- Foreground only (transparent background) - sized inside the safe zone
+       so Android's adaptive-icon mask (circle/squircle/rounded-square) never clips it -->
+  <rect x="25" y="25" width="22" height="22" rx="5" fill="#FFFFFF"/>
+  <rect x="53" y="25" width="22" height="22" rx="5" fill="#FFFFFF"/>
+  <rect x="25" y="53" width="22" height="22" rx="5" fill="#FFFFFF"/>
+  <rect x="53" y="53" width="22" height="22" rx="5" fill="#2E7D32"/>
+</svg>

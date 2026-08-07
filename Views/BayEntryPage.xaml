@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="YardBayApp.Views.BayEntryPage"
+             Title="Bay Entry">
+
+    <ContentPage.ToolbarItems>
+        <ToolbarItem Text="History" Clicked="OnHistoryClicked"/>
+    </ContentPage.ToolbarItems>
+
+
+    <ScrollView>
+        <VerticalStackLayout Padding="16" Spacing="14">
+
+            <Frame BackgroundColor="#1F3A5F" Padding="12" CornerRadius="8" HasShadow="False">
+                <Label x:Name="LiveClockLabel"
+                       TextColor="White"
+                       FontSize="16"
+                       FontAttributes="Bold"
+                       HorizontalTextAlignment="Center" />
+            </Frame>
+
+            <Label Text="Date / Time" FontAttributes="Bold" />
+            <DatePicker x:Name="EntryDatePicker" />
+            <TimePicker x:Name="EntryTimePicker" />
+
+            <BoxView HeightRequest="1" Color="LightGray" Margin="0,8" />
+
+            <!-- Bay A -->
+            <Label Text="A Bay" FontAttributes="Bold" FontSize="16" />
+            <Grid ColumnDefinitions="*,*" RowDefinitions="Auto,Auto" ColumnSpacing="10" RowSpacing="6">
+                <Label Grid.Row="0" Grid.Column="0" Text="Examine" />
+                <Label Grid.Row="0" Grid.Column="1" Text="Not Examine" />
+                <Entry Grid.Row="1" Grid.Column="0" x:Name="AExamine" Keyboard="Numeric" Placeholder="0" />
+                <Entry Grid.Row="1" Grid.Column="1" x:Name="ANotExamine" Keyboard="Numeric" Placeholder="0" />
+            </Grid>
+            <Grid ColumnDefinitions="*,*" RowDefinitions="Auto,Auto" ColumnSpacing="10" RowSpacing="6">
+                <Label Grid.Row="0" Grid.Column="0" Text="Space 40'" />
+                <Label Grid.Row="0" Grid.Column="1" Text="Space 20'" />
+                <Entry Grid.Row="1" Grid.Column="0" x:Name="ASpace40" Keyboard="Numeric" Placeholder="0" />
+                <Entry Grid.Row="1" Grid.Column="1" x:Name="ASpace20" Keyboard="Numeric" Placeholder="0" />
+            </Grid>
+
+            <BoxView HeightRequest="1" Color="LightGray" Margin="0,8" />
+
+            <!-- Bay B -->
+            <Label Text="B Bay" FontAttributes="Bold" FontSize="16" />
+            <Grid ColumnDefinitions="*,*" RowDefinitions="Auto,Auto" ColumnSpacing="10" RowSpacing="6">
+                <Label Grid.Row="0" Grid.Column="0" Text="Examine" />
+                <Label Grid.Row="0" Grid.Column="1" Text="Not Examine" />
+                <Entry Grid.Row="1" Grid.Column="0" x:Name="BExamine" Keyboard="Numeric" Placeholder="0" />
+                <Entry Grid.Row="1" Grid.Column="1" x:Name="BNotExamine" Keyboard="Numeric" Placeholder="0" />
+            </Grid>
+            <Grid ColumnDefinitions="*,*" RowDefinitions="Auto,Auto" ColumnSpacing="10" RowSpacing="6">
+                <Label Grid.Row="0" Grid.Column="0" Text="Space 40'" />
+                <Label Grid.Row="0" Grid.Column="1" Text="Space 20'" />
+                <Entry Grid.Row="1" Grid.Column="0" x:Name="BSpace40" Keyboard="Numeric" Placeholder="0" />
+                <Entry Grid.Row="1" Grid.Column="1" x:Name="BSpace20" Keyboard="Numeric" Placeholder="0" />
+            </Grid>
+
+            <BoxView HeightRequest="1" Color="LightGray" Margin="0,8" />
+
+            <!-- Bay C -->
+            <Label Text="C Bay" FontAttributes="Bold" FontSize="16" />
+            <Grid ColumnDefinitions="*,*" RowDefinitions="Auto,Auto" ColumnSpacing="10" RowSpacing="6">
+                <Label Grid.Row="0" Grid.Column="0" Text="Examine" />
+                <Label Grid.Row="0" Grid.Column="1" Text="Not Examine" />
+                <Entry Grid.Row="1" Grid.Column="0" x:Name="CExamine" Keyboard="Numeric" Placeholder="0" />
+                <Entry Grid.Row="1" Grid.Column="1" x:Name="CNotExamine" Keyboard="Numeric" Placeholder="0" />
+            </Grid>
+            <Grid ColumnDefinitions="*,*" RowDefinitions="Auto,Auto" ColumnSpacing="10" RowSpacing="6">
+                <Label Grid.Row="0" Grid.Column="0" Text="Space 40'" />
+                <Label Grid.Row="0" Grid.Column="1" Text="Space 20'" />
+                <Entry Grid.Row="1" Grid.Column="0" x:Name="CSpace40" Keyboard="Numeric" Placeholder="0" />
+                <Entry Grid.Row="1" Grid.Column="1" x:Name="CSpace20" Keyboard="Numeric" Placeholder="0" />
+            </Grid>
+
+            <BoxView HeightRequest="1" Color="LightGray" Margin="0,8" />
+
+            <!-- Bay D -->
+            <Label Text="D Bay" FontAttributes="Bold" FontSize="16" />
+            <Grid ColumnDefinitions="*,*" RowDefinitions="Auto,Auto" ColumnSpacing="10" RowSpacing="6">
+                <Label Grid.Row="0" Grid.Column="0" Text="Examine" />
+                <Label Grid.Row="0" Grid.Column="1" Text="Not Examine" />
+                <Entry Grid.Row="1" Grid.Column="0" x:Name="DExamine" Keyboard="Numeric" Placeholder="0" />
+                <Entry Grid.Row="1" Grid.Column="1" x:Name="DNotExamine" Keyboard="Numeric" Placeholder="0" />
+            </Grid>
+            <Grid ColumnDefinitions="*,*" RowDefinitions="Auto,Auto" ColumnSpacing="10" RowSpacing="6">
+                <Label Grid.Row="0" Grid.Column="0" Text="Space 40'" />
+                <Label Grid.Row="0" Grid.Column="1" Text="Space 20'" />
+                <Entry Grid.Row="1" Grid.Column="0" x:Name="DSpace40" Keyboard="Numeric" Placeholder="0" />
+                <Entry Grid.Row="1" Grid.Column="1" x:Name="DSpace20" Keyboard="Numeric" Placeholder="0" />
+            </Grid>
+
+            <BoxView HeightRequest="1" Color="LightGray" Margin="0,8" />
+
+            <Label Text="Bay Out" FontAttributes="Bold" />
+            <Entry x:Name="BayOutEntry" Keyboard="Numeric" Placeholder="0" />
+
+            <Button x:Name="SaveButton" Text="Save" Clicked="OnSaveClicked" Margin="0,16,0,0" />
+            <Label x:Name="StatusLabel" TextColor="Green" HorizontalTextAlignment="Center" />
+
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentPage>

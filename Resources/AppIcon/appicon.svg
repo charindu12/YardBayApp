@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <!-- Background -->
+  <rect x="0" y="0" width="100" height="100" rx="20" fill="#1F3A5F"/>
+
+  <!-- 2x2 bay grid: Bay A, B, C, D -->
+  <rect x="16" y="16" width="30" height="30" rx="6" fill="#FFFFFF"/>
+  <rect x="54" y="16" width="30" height="30" rx="6" fill="#FFFFFF"/>
+  <rect x="16" y="54" width="30" height="30" rx="6" fill="#FFFFFF"/>
+  <rect x="54" y="54" width="30" height="30" rx="6" fill="#2E7D32"/>
+</svg>
