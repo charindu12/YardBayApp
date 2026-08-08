@@ -14,6 +14,12 @@ namespace YardBayApp.Views
             InitializeComponent();
             EntryDatePicker.Date = DateTime.Today;
             EntryTimePicker.Time = DateTime.Now.TimeOfDay;
+            // Defaults to yesterday: containers that move today are usually only
+            // counted/confirmed the next day, so this is normally entered a day behind
+            // the bay entry date above. The supervisor can change it either way.
+            GateDatePicker.Date = DateTime.Today.AddDays(-1);
+            EntryDatePicker.DateSelected += async (_, __) => await LoadExistingForDateAsync();
+            GateDatePicker.DateSelected += async (_, __) => await LoadExistingGateInOutAsync();
         }
 
         protected override async void OnAppearing()
@@ -35,6 +41,9 @@ namespace YardBayApp.Views
                 StatusLabel.TextColor = Colors.Red;
                 StatusLabel.Text = $"Could not load bays: {ex.Message}";
             }
+
+            await LoadExistingForDateAsync();
+            await LoadExistingGateInOutAsync();
         }
 
         protected override void OnDisappearing()
@@ -62,6 +71,88 @@ namespace YardBayApp.Views
 
         private Guid BayIdFor(string code) =>
             _bays.FirstOrDefault(b => b.Code == code)?.Id ?? Guid.Empty;
+
+        /// <summary>
+        /// Fetches whatever was already saved for the date currently picked and fills the
+        /// form with it, so picking an existing date shows that day's real numbers instead
+        /// of blank/0 fields. If the field is left blank and saved, it would otherwise wipe
+        /// out real data since Save now overwrites the whole day (see SaveOrUpdateBatchAsync).
+        /// </summary>
+        private async Task LoadExistingForDateAsync()
+        {
+            void SetBay(string code, int examine, int notExamine, int space40, int space20)
+            {
+                switch (code)
+                {
+                    case "A": AExamine.Text = examine.ToString(); ANotExamine.Text = notExamine.ToString(); ASpace40.Text = space40.ToString(); ASpace20.Text = space20.ToString(); break;
+                    case "B": BExamine.Text = examine.ToString(); BNotExamine.Text = notExamine.ToString(); BSpace40.Text = space40.ToString(); BSpace20.Text = space20.ToString(); break;
+                    case "C": CExamine.Text = examine.ToString(); CNotExamine.Text = notExamine.ToString(); CSpace40.Text = space40.ToString(); CSpace20.Text = space20.ToString(); break;
+                    case "D": DExamine.Text = examine.ToString(); DNotExamine.Text = notExamine.ToString(); DSpace40.Text = space40.ToString(); DSpace20.Text = space20.ToString(); break;
+                }
+            }
+
+            // Clear everything first so a day with no saved entry starts blank, not with
+            // whatever was left over from the previously viewed date.
+            AExamine.Text = ANotExamine.Text = ASpace40.Text = ASpace20.Text = string.Empty;
+            BExamine.Text = BNotExamine.Text = BSpace40.Text = BSpace20.Text = string.Empty;
+            CExamine.Text = CNotExamine.Text = CSpace40.Text = CSpace20.Text = string.Empty;
+            DExamine.Text = DNotExamine.Text = DSpace40.Text = DSpace20.Text = string.Empty;
+            BayOutEntry.Text = string.Empty;
+
+            try
+            {
+                var (bayRows, summary) = await SupabaseService.Instance.GetEntryForDateAsync(EntryDatePicker.Date);
+
+                foreach (var row in bayRows)
+                {
+                    var code = _bays.FirstOrDefault(b => b.Id == row.BayId)?.Code;
+                    if (code != null)
+                        SetBay(code, row.ExamineCount, row.NotExamineCount, row.Space40ft, row.Space20ft);
+                }
+
+                if (summary != null)
+                {
+                    BayOutEntry.Text = summary.BayOut.ToString();
+                    EntryTimePicker.Time = SriLankaTime.ToLocal(summary.RecordedAt).TimeOfDay;
+                    StatusLabel.TextColor = Colors.Gray;
+                    StatusLabel.Text = "Existing entry loaded for this date - Save will overwrite it.";
+                }
+                else
+                {
+                    StatusLabel.Text = string.Empty;
+                }
+            }
+            catch (Exception ex)
+            {
+                StatusLabel.TextColor = Colors.Red;
+                StatusLabel.Text = $"Could not check existing entry: {ex.Message}";
+            }
+        }
+
+        /// <summary>
+        /// Loads whatever Total Gate In/Out numbers were already saved for the
+        /// currently picked gate date - independent of the bay entry date above.
+        /// </summary>
+        private async Task LoadExistingGateInOutAsync()
+        {
+            GateInEntry.Text = string.Empty;
+            GateOutEntry.Text = string.Empty;
+
+            try
+            {
+                var existing = await SupabaseService.Instance.GetGateInOutForDateAsync(GateDatePicker.Date);
+                if (existing != null)
+                {
+                    GateInEntry.Text = existing.TotalGateIn.ToString();
+                    GateOutEntry.Text = existing.TotalGateOut.ToString();
+                }
+            }
+            catch (Exception ex)
+            {
+                StatusLabel.TextColor = Colors.Red;
+                StatusLabel.Text = $"Could not check existing gate entry: {ex.Message}";
+            }
+        }
 
         private async void OnSaveClicked(object sender, EventArgs e)
         {
@@ -111,7 +202,15 @@ namespace YardBayApp.Views
                 var bayOut = ParseOrZero(BayOutEntry.Text);
 
                 // TODO: replace null with the logged-in user's Guid once login is wired up
-                await SupabaseService.Instance.SaveBatchAsync(inputs, bayOut, recordedAt, null);
+                // Uses SaveOrUpdateBatchAsync so re-saving for a date that already has an
+                // entry overwrites it instead of creating a duplicate.
+                await SupabaseService.Instance.SaveOrUpdateBatchAsync(inputs, bayOut, recordedAt, null);
+
+                // Total Gate In and Out Container is saved against its own date (see
+                // GateDatePicker), independently of the bay entry date above.
+                var totalGateIn = ParseOrZero(GateInEntry.Text);
+                var totalGateOut = ParseOrZero(GateOutEntry.Text);
+                await SupabaseService.Instance.SaveOrUpdateGateInOutAsync(GateDatePicker.Date, totalGateIn, totalGateOut, null);
 
                 StatusLabel.TextColor = Colors.Green;
                 StatusLabel.Text = "Saved successfully.";
