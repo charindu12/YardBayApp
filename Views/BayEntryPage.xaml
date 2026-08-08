@@ -20,6 +20,22 @@
                        HorizontalTextAlignment="Center" />
             </Frame>
 
+            <!-- Paste the daily WhatsApp-style report text here and tap the button to
+                 auto-fill the bay fields below, instead of typing each number by hand. -->
+            <Label Text="Paste Daily Report" FontAttributes="Bold" />
+            <Editor x:Name="ReportPasteEditor"
+                    Placeholder="Paste the report text here..."
+                    HeightRequest="140"
+                    AutoSize="TextChanges"
+                    TextChanged="OnReportTextChanged" />
+            <Button x:Name="ParseReportButton"
+                    Text="Re-Fill Form From Report"
+                    Clicked="OnParseReportClicked"
+                    BackgroundColor="#1F3A5F"
+                    TextColor="White" />
+
+            <BoxView HeightRequest="1" Color="LightGray" Margin="0,8" />
+
             <Label Text="Date / Time" FontAttributes="Bold" />
             <DatePicker x:Name="EntryDatePicker" />
             <TimePicker x:Name="EntryTimePicker" />

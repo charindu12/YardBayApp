@@ -1,3 +1,4 @@
+using System.Text.RegularExpressions;
 using YardBayApp.Helpers;
 using YardBayApp.Models;
 using YardBayApp.Services;
@@ -67,6 +68,126 @@ namespace YardBayApp.Views
         private async void OnHistoryClicked(object sender, EventArgs e)
         {
             await Navigation.PushAsync(new HistoryPage());
+        }
+
+        /// <summary>
+        /// Parses a pasted daily report (WhatsApp-style free text, e.g. one bay per
+        /// paragraph with "Examine = X" / "Not examine = Y" / "Bay space = Z (40-.. 20-..)"
+        /// lines, a "Bay out = N" line, and an optional date/time header) and fills the
+        /// matching form fields, instead of the supervisor typing every number by hand.
+        /// This is best-effort text parsing - always review the filled numbers before Save,
+        /// especially if the report's wording differs from the usual format.
+        /// </summary>
+        private void OnParseReportClicked(object sender, EventArgs e) => ParseAndFillReport();
+
+        /// <summary>Auto-fills the form the moment text is pasted into the report box,
+        /// so the supervisor doesn't need to tap the button separately after pasting.</summary>
+        private void OnReportTextChanged(object sender, TextChangedEventArgs e)
+        {
+            if (string.IsNullOrWhiteSpace(e.NewTextValue)) return;
+            ParseAndFillReport();
+        }
+
+        private void ParseAndFillReport()
+        {
+            var text = ReportPasteEditor.Text ?? string.Empty;
+            if (string.IsNullOrWhiteSpace(text))
+            {
+                StatusLabel.TextColor = Colors.Red;
+                StatusLabel.Text = "Paste the report text first.";
+                return;
+            }
+
+            var warnings = new List<string>();
+
+            // ---- Date / time header, e.g. "2026/08/08 08.30Am" ----
+            var dtMatch = Regex.Match(text, @"(\d{4})/(\d{2})/(\d{2})\s+(\d{1,2})\.(\d{2})\s*([AaPp][Mm])");
+            if (dtMatch.Success)
+            {
+                var year = int.Parse(dtMatch.Groups[1].Value);
+                var month = int.Parse(dtMatch.Groups[2].Value);
+                var day = int.Parse(dtMatch.Groups[3].Value);
+                var hour = int.Parse(dtMatch.Groups[4].Value);
+                var minute = int.Parse(dtMatch.Groups[5].Value);
+                var ampm = dtMatch.Groups[6].Value.ToUpperInvariant();
+                if (ampm == "PM" && hour != 12) hour += 12;
+                if (ampm == "AM" && hour == 12) hour = 0;
+
+                try
+                {
+                    EntryDatePicker.Date = new DateTime(year, month, day);
+                    EntryTimePicker.Time = new TimeSpan(hour, minute, 0);
+                }
+                catch
+                {
+                    warnings.Add("Could not read the date/time header - Date/Time left as-is.");
+                }
+            }
+            else
+            {
+                warnings.Add("No date/time header found - Date/Time left as-is.");
+            }
+
+            // ---- Per-bay blocks ----
+            void FillBay(string code, Entry examineEntry, Entry notExamineEntry, Entry space40Entry, Entry space20Entry)
+            {
+                // Everything from "<code> bay" up to the next bay letter, "Bay out", "Total", or the end.
+                var segMatch = Regex.Match(text,
+                    $@"(?is){code}\s*bay(.*?)(?=[ABCD]\s*bay\b|bay\s*out\b|total\b|$)");
+                if (!segMatch.Success)
+                {
+                    warnings.Add($"{code} Bay: section not found in the pasted text.");
+                    return;
+                }
+                var segment = segMatch.Groups[1].Value;
+
+                var notExamineMatch = Regex.Match(segment, @"(?i)not\s*examine\s*=?\s*(\d+)");
+                var examineMatch = Regex.Match(segment, @"(?i)(?<!not\s)examine\s*=?\s*(\d+)");
+                var spaceMatch = Regex.Match(segment, @"(?i)(?:bay\s*)?space\s*=?\s*(\d+)");
+                var space40Match = Regex.Match(segment, @"(?i)40'?\s*[-:xX]?\s*(\d+)");
+                var space20Match = Regex.Match(segment, @"(?i)20'?\s*[-:xX]?\s*(\d+)");
+
+                examineEntry.Text = examineMatch.Success ? examineMatch.Groups[1].Value : "0";
+                notExamineEntry.Text = notExamineMatch.Success ? notExamineMatch.Groups[1].Value : "0";
+                if (!examineMatch.Success) warnings.Add($"{code} Bay: Examine not found.");
+                if (!notExamineMatch.Success) warnings.Add($"{code} Bay: Not Examine not found.");
+
+                if (space40Match.Success && space20Match.Success)
+                {
+                    space40Entry.Text = space40Match.Groups[1].Value;
+                    space20Entry.Text = space20Match.Groups[1].Value;
+                }
+                else
+                {
+                    space40Entry.Text = "0";
+                    space20Entry.Text = "0";
+                    if (spaceMatch.Success && int.TryParse(spaceMatch.Groups[1].Value, out var totalSpace) && totalSpace != 0)
+                        warnings.Add($"{code} Bay: space total ({totalSpace}) has no 40'/20' breakdown - fill Space 40'/Space 20' manually.");
+                }
+            }
+
+            FillBay("A", AExamine, ANotExamine, ASpace40, ASpace20);
+            FillBay("B", BExamine, BNotExamine, BSpace40, BSpace20);
+            FillBay("C", CExamine, CNotExamine, CSpace40, CSpace20);
+            FillBay("D", DExamine, DNotExamine, DSpace40, DSpace20);
+
+            // ---- Bay out ----
+            var bayOutMatch = Regex.Match(text, @"(?i)bay\s*out\s*=?\s*(\d+)");
+            if (bayOutMatch.Success)
+                BayOutEntry.Text = bayOutMatch.Groups[1].Value;
+            else
+                warnings.Add("Bay Out not found.");
+
+            if (warnings.Count == 0)
+            {
+                StatusLabel.TextColor = Colors.Green;
+                StatusLabel.Text = "Filled from the pasted report - please check the numbers, then Save.";
+            }
+            else
+            {
+                StatusLabel.TextColor = Colors.Orange;
+                StatusLabel.Text = "Filled with some gaps - please check before Save:\n" + string.Join("\n", warnings);
+            }
         }
 
         private Guid BayIdFor(string code) =>
