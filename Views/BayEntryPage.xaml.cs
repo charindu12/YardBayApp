@@ -1,3 +1,4 @@
+cat > Views/BayEntryPage.xaml.cs << 'ENDOFFILE'
 using System.Text.RegularExpressions;
 using YardBayApp.Helpers;
 using YardBayApp.Models;
@@ -15,11 +16,23 @@ namespace YardBayApp.Views
             InitializeComponent();
             EntryDatePicker.Date = DateTime.Today;
             EntryTimePicker.Time = DateTime.Now.TimeOfDay;
-            // Defaults to yesterday: containers that move today are usually only
-            // counted/confirmed the next day, so this is normally entered a day behind
-            // the bay entry date above. The supervisor can change it either way.
+            // Gate In/Out is normally recorded a day behind the Bay Entry date
+            // (containers that move today are usually only counted/confirmed the
+            // next day) - both pickers start out matched on that same relationship.
             GateDatePicker.Date = DateTime.Today.AddDays(-1);
-            EntryDatePicker.DateSelected += async (_, __) => await LoadExistingForDateAsync();
+
+            EntryDatePicker.DateSelected += async (_, __) =>
+            {
+                // Keep Gate Date locked one day behind whichever Bay Entry date is
+                // being viewed, so switching Bay Entry to e.g. 2026-08-08 always
+                // shows the matching 2026-08-07 Gate In/Out numbers automatically,
+                // instead of leaving whatever Gate Date was previously selected.
+                // The supervisor can still override Gate Date manually afterwards
+                // if a particular day needs a different pairing.
+                GateDatePicker.Date = EntryDatePicker.Date.AddDays(-1);
+                await LoadExistingForDateAsync();
+                await LoadExistingGateInOutAsync();
+            };
             GateDatePicker.DateSelected += async (_, __) => await LoadExistingGateInOutAsync();
         }
 
@@ -348,3 +361,4 @@ namespace YardBayApp.Views
         }
     }
 }
+ENDOFFILE
