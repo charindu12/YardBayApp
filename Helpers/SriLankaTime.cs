@@ -26,8 +26,19 @@ namespace YardBayApp.Helpers
         /// </summary>
         public static DateTime ToLocal(DateTime utcDateTime)
         {
-            var utcFixed = DateTime.SpecifyKind(utcDateTime, DateTimeKind.Utc);
-            return utcFixed.Add(Offset);
+            // The Supabase/Postgrest JSON client can hand back a DateTime whose Kind is
+            // Local (auto-shifted to this machine's system timezone during deserialize)
+            // or Unspecified, not always Utc. Blindly stamping Kind=Utc on an
+            // already-shifted Local value and then adding the SL offset caused a
+            // double-shift bug (e.g. 08:15 showing as 13:45). Normalize to true UTC
+            // first, based on whatever Kind we actually got, then add the offset once.
+            DateTime trueUtc = utcDateTime.Kind switch
+            {
+                DateTimeKind.Utc => utcDateTime,
+                DateTimeKind.Local => utcDateTime.ToUniversalTime(),
+                _ => DateTime.SpecifyKind(utcDateTime, DateTimeKind.Utc)
+            };
+            return trueUtc.Add(Offset);
         }
     }
 }
