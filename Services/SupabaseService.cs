@@ -48,7 +48,7 @@ namespace YardBayApp.Services
         /// day is removed first so this acts as an edit/overwrite instead of stacking a
         /// duplicate on top of it.
         /// </summary>
-        public async Task SaveOrUpdateBatchAsync(List<BayEntryInput> bayInputs, int bayOut, DateTime recordedAt, Guid? userId)
+        public async Task<Guid> SaveOrUpdateBatchAsync(List<BayEntryInput> bayInputs, int bayOut, DateTime recordedAt, Guid? userId)
         {
             var client = await GetClientAsync();
 
@@ -102,6 +102,8 @@ namespace YardBayApp.Services
             };
 
             await client.From<YardSummaryEntry>().Insert(summary);
+
+            return batchId;
         }
 
         /// <summary>
@@ -111,7 +113,7 @@ namespace YardBayApp.Services
         /// so it has its own table keyed one-row-per-date. Re-saving the same date
         /// overwrites the previous In/Out values instead of duplicating them.
         /// </summary>
-        public async Task SaveOrUpdateGateInOutAsync(DateTime gateDate, int totalIn, int totalOut, Guid? userId)
+        public async Task SaveOrUpdateGateInOutAsync(DateTime gateDate, int totalIn, int totalOut, Guid? userId, Guid? bayBatchId)
         {
             var client = await GetClientAsync();
             var dateOnly = gateDate.Date;
@@ -133,7 +135,10 @@ namespace YardBayApp.Services
                 GateDate = dateOnly,
                 TotalGateIn = totalIn,
                 TotalGateOut = totalOut,
-                CreatedBy = userId
+                CreatedBy = userId,
+                // Links this gate entry to the bay batch it was saved alongside, so the
+                // dashboard can match them exactly - no timing ambiguity.
+                BayBatchId = bayBatchId
             };
 
             await client.From<GateInOutEntry>().Insert(entry);

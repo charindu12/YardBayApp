@@ -1,3 +1,4 @@
+cat > Views/BayEntryPage.xaml.cs << 'ENDOFFILE'
 using System.Text.RegularExpressions;
 using YardBayApp.Helpers;
 using YardBayApp.Models;
@@ -15,11 +16,23 @@ namespace YardBayApp.Views
             InitializeComponent();
             EntryDatePicker.Date = DateTime.Today;
             EntryTimePicker.Time = DateTime.Now.TimeOfDay;
-            // Defaults to yesterday: containers that move today are usually only
-            // counted/confirmed the next day, so this is normally entered a day behind
-            // the bay entry date above. The supervisor can change it either way.
+            // Gate In/Out is normally recorded a day behind the Bay Entry date
+            // (containers that move today are usually only counted/confirmed the
+            // next day) - both pickers start out matched on that same relationship.
             GateDatePicker.Date = DateTime.Today.AddDays(-1);
-            EntryDatePicker.DateSelected += async (_, __) => await LoadExistingForDateAsync();
+
+            EntryDatePicker.DateSelected += async (_, __) =>
+            {
+                // Keep Gate Date locked one day behind whichever Bay Entry date is
+                // being viewed, so switching Bay Entry to e.g. 2026-08-08 always
+                // shows the matching 2026-08-07 Gate In/Out numbers automatically,
+                // instead of leaving whatever Gate Date was previously selected.
+                // The supervisor can still override Gate Date manually afterwards
+                // if a particular day needs a different pairing.
+                GateDatePicker.Date = EntryDatePicker.Date.AddDays(-1);
+                await LoadExistingForDateAsync();
+                await LoadExistingGateInOutAsync();
+            };
             GateDatePicker.DateSelected += async (_, __) => await LoadExistingGateInOutAsync();
         }
 
@@ -324,14 +337,17 @@ namespace YardBayApp.Views
 
                 // TODO: replace null with the logged-in user's Guid once login is wired up
                 // Uses SaveOrUpdateBatchAsync so re-saving for a date that already has an
-                // entry overwrites it instead of creating a duplicate.
-                await SupabaseService.Instance.SaveOrUpdateBatchAsync(inputs, bayOut, recordedAt, null);
+                // entry overwrites it instead of creating a duplicate. The returned batchId
+                // links this bay submission to the gate entry saved right below, so the
+                // dashboard can match them exactly regardless of gate_date or save timing.
+                var batchId = await SupabaseService.Instance.SaveOrUpdateBatchAsync(inputs, bayOut, recordedAt, null);
 
                 // Total Gate In and Out Container is saved against its own date (see
-                // GateDatePicker), independently of the bay entry date above.
+                // GateDatePicker), independently of the bay entry date above - but linked
+                // to this same batchId so the dashboard knows they belong together.
                 var totalGateIn = ParseOrZero(GateInEntry.Text);
                 var totalGateOut = ParseOrZero(GateOutEntry.Text);
-                await SupabaseService.Instance.SaveOrUpdateGateInOutAsync(GateDatePicker.Date, totalGateIn, totalGateOut, null);
+                await SupabaseService.Instance.SaveOrUpdateGateInOutAsync(GateDatePicker.Date, totalGateIn, totalGateOut, null, batchId);
 
                 StatusLabel.TextColor = Colors.Green;
                 StatusLabel.Text = "Saved successfully.";
@@ -348,3 +364,4 @@ namespace YardBayApp.Views
         }
     }
 }
+ENDOFFILE
