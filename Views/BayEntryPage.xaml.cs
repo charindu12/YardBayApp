@@ -1,4 +1,3 @@
-cat > Views/BayEntryPage.xaml.cs << 'ENDOFFILE'
 using System.Text.RegularExpressions;
 using YardBayApp.Helpers;
 using YardBayApp.Models;
@@ -364,4 +363,3 @@ namespace YardBayApp.Views
         }
     }
 }
-ENDOFFILE
